@@ -77,6 +77,87 @@ class BaseModel
         //Hoàn thiện câu lệnh SQL INSERT
         $model->sqlBuilder = "INSERT INTO $model->tableName( $columnNames ) VALUES( $paramName )";
 
-        echo $model->sqlBuilder;
+        $stmt = $model->conn->prepare($model->sqlBuilder);
+        $stmt->execute($data);
+        //trả lại giá trị khóa vừa thêm
+        return $model->conn->lastInsertId();
+    }
+
+    /**
+     * Phương thức update để cập nhật dữ liệu của 1 bảng
+     * @param $id khóa chính
+     * @param $data mảng dữ liệu cần update; mảng phải là mảng liên hợp có key là tên cột, value tương ứng
+     */
+    public static function update($id, $data)
+    {
+        $model = new static;
+        $model->sqlBuilder = "UPDATE $model->tableName SET ";
+
+        foreach ($data as $key => $value) {
+            $model->sqlBuilder .= "`$key`=:$key, ";
+        }
+
+        $model->sqlBuilder = rtrim($model->sqlBuilder, ", ");
+        //Thêm điều kiện để cập nhật
+        $model->sqlBuilder .= " WHERE $model->primaryKey=:$model->primaryKey";
+
+        //Thêm $id vào data
+        $data["$model->primaryKey"] = $id;
+        $stmt = $model->conn->prepare($model->sqlBuilder);
+        $stmt->execute($data);
+    }
+
+    /**
+     * Phương thức delete dùng để xóa dữ liệu theo id
+     * @param $id: giá trị id cần xóa
+     */
+    public static function delete($id)
+    {
+        $model = new static;
+        $model->sqlBuilder = "DELETE FROM $model->tableName WHERE $model->primaryKey=:$model->primaryKey";
+        $stmt = $model->conn->prepare($model->sqlBuilder);
+
+        //Truyền tham số
+        $stmt->bindParam(":$model->primaryKey", $id);
+        $stmt->execute();
+    }
+
+    /**
+     * Phương thức where lấy dữ liệu theo điều kiện
+     * @param $column: tên cột
+     * @param $codition: điều kiện
+     * @param $value: giá trị
+     */
+    public static function where($column, $codition, $value)
+    {
+        $model = new static;
+        $model->sqlBuilder = "SELECT * FROM $model->tableName WHERE `$column` $codition '$value'";
+        return $model;
+    }
+    /**
+     * phương andWhere để thêm điều kiện and vào sql
+     * @param $column: tên cột
+     * @param $codition: điều kiện
+     * @param $value: giá trị
+     */
+    public function andWhere($column, $codition, $value)
+    {
+        $this->sqlBuilder .= " AND `$column` $codition '$value'";
+        return $this;
+    }
+    public function orWhere($column, $codition, $value)
+    {
+        $this->sqlBuilder .= " OR `$column` $codition '$value'";
+        return $this;
+    }
+    /**
+     * Phương thức get để thực thi sql và lấy dữ liệu
+     */
+    public function get()
+    {
+        $stmt = $this->conn->prepare($this->sqlBuilder);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_CLASS);
+        return $result;
     }
 }
