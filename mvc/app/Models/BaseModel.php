@@ -46,7 +46,7 @@ class BaseModel
         //Đưa dữ liệu chứa tham số vào 1 mảng
         $data = ["$model->primaryKey" => $id];
         $stmt->execute($data);
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_CLASS);
         if ($result) {
             return $result[0];
         }

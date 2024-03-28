@@ -1,29 +1,48 @@
 <?php
 
+use App\Controllers\HomeController;
 use App\Models\ProductModel;
+use Phroute\Phroute\RouteCollector;
 
 require_once "env.php";
 require_once "functions.php";
 require_once __DIR__ . "/vendor/autoload.php";
 
-// $products = ProductModel::all();
+//Lấy đường dẫn
+$url = $_GET['url'] ?? '/';
 
-$product = ProductModel::find(143);
-dd($product);
+$router = new RouteCollector();
 
-$data = [
-    "name" => "Iphone 16 new",
-    "price" => 1210,
-    "image" => "iphone16.jpg",
-    "cate_id" => 15
-];
-// ProductModel::insert($data);
-// ProductModel::update(177, $data);
-// ProductModel::delete(177);
+$router->get("/", [HomeController::class, 'index']);
+$router->get('/product/detail/{id}', [HomeController::class, 'detail']);
+$router->get("/contact", function () {
+    echo "CONTACT PAGE";
+});
+$router->get("/user/{id}", function ($id) {
+    echo "User id: $id";
+});
 
-//Lấy sản phẩm có price > 20000, từ danh mục có cate_id=6
-// $products = ProductModel::where('price', '>', 40000)
-//     ->andWhere('cate_id', '=', 6)->get();
+$router->group(
+    ['prefix' => 'admin'],
+    function ($router) {
+        $router->get('product', function () {
+            echo "PRODUCT";
+        });
+        $router->get("categories", function () {
+            echo "Categories";
+        });
+    }
+);
 
-$products = ProductModel::where('name', 'LIKE', "%Samir%")->get();
-dd($products);
+
+try {
+    # NB. You can cache the return value from $router->getData() so you don't have to create the routes each request - massive speed gains
+    $dispatcher = new Phroute\Phroute\Dispatcher($router->getData());
+
+    $response = $dispatcher->dispatch($_SERVER['REQUEST_METHOD'], $url);
+
+    // Print out the value returned from the dispatched function
+    echo $response;
+} catch (Phroute\Phroute\Exception\HttpRouteNotFoundException $e) {
+    echo "404 FILE NOT FOUND!";
+}
