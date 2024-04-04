@@ -29,6 +29,9 @@ $router->group(
         $router->get('product', [ProductController::class, 'list']);
         $router->get('product/add', [ProductController::class, 'add']);
         $router->post('product/add', [ProductController::class, 'store']);
+        $router->get('product/edit/{id}', [ProductController::class, 'edit']);
+        $router->post('product/edit/{id}', [ProductController::class, 'update']);
+        $router->get('product/delete/{id}', [ProductController::class, 'delete']);
     }
 );
 

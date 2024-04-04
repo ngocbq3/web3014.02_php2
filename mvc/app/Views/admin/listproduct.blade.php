@@ -8,6 +8,9 @@
 </head>
 <body>
     <h2>Danh sách sản phẩm</h2>
+    <div>
+        {{ $message ?? '' }}
+    </div>
     <table border="1">
         <tr>
             <th>#ID</th>
@@ -30,7 +33,8 @@
                 <td>{{ $product->price }}</td>
                 <td>{{ $product->short_desc }}</td>
                 <td>
-                    Sửa / Xóa
+                    <a href="{{ BASE_URL . 'admin/product/edit/' . $product->id }}">Sửa</a>
+                    <a onclick="return confirm('Bạn có muốn xóa không?')" href="{{ BASE_URL . 'admin/product/delete/' . $product->id }}">Xóa</a>
                 </td>
             </tr>
         @endforeach
