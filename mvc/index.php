@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\HomeController;
+use App\Controllers\ProductController;
 use App\Models\ProductModel;
 use Phroute\Phroute\RouteCollector;
 
@@ -25,12 +26,9 @@ $router->get("/user/{id}", function ($id) {
 $router->group(
     ['prefix' => 'admin'],
     function ($router) {
-        $router->get('product', function () {
-            echo "PRODUCT";
-        });
-        $router->get("categories", function () {
-            echo "Categories";
-        });
+        $router->get('product', [ProductController::class, 'list']);
+        $router->get('product/add', [ProductController::class, 'add']);
+        $router->post('product/add', [ProductController::class, 'store']);
     }
 );
 
